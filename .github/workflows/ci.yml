@@ -1,0 +1,64 @@
+name: build-verify-reproduce
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build-verify-reproduce:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build image
+        run: docker build -t radxa-zero3-boot-firmware:latest .
+
+      - name: Build artifacts (run 1)
+        run: |
+          mkdir -p run1/out
+          docker run --rm \
+            -v "$PWD/run1/out:/out" \
+            -e BUILD_DIR=/build -e OUT_DIR=/out \
+            radxa-zero3-boot-firmware:latest
+
+      - name: Build artifacts (run 2, isolated)
+        run: |
+          mkdir -p run2/out
+          docker run --rm \
+            -v "$PWD/run2/out:/out" \
+            -e BUILD_DIR=/build -e OUT_DIR=/out \
+            radxa-zero3-boot-firmware:latest
+
+      - name: Verify DTBs present (run 1)
+        run: OUT_DIR="$PWD/run1/out" bash scripts/verify/dtb.sh
+
+      - name: Verify binman structure (run 1)
+        run: OUT_DIR="$PWD/run1/out" bash scripts/verify/binman.sh
+
+      - name: Reproducibility — compare all four artifacts across runs
+        run: |
+          set -euo pipefail
+          for f in u-boot-rockchip.bin u-boot.itb rk3566-radxa-zero-3w.dtb rk3566-radxa-zero-3e.dtb; do
+            h1=$$(sha256sum "run1/out/$$f" | awk '{print $$1}')
+            h2=$$(sha256sum "run2/out/$$f" | awk '{print $$1}')
+            echo "$$f  run1=$$h1  run2=$$h2"
+            [ "$$h1" = "$$h2" ] || { echo "FAIL: $$f not reproducible"; exit 1; }
+          done
+          echo "PASS: all 4 artifacts byte-identical across isolated builds"
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: u-boot-rockchip-bin
+          path: |
+            run1/out/u-boot-rockchip.bin
+            run1/out/u-boot.itb
+            run1/out/rk3566-radxa-zero-3w.dtb
+            run1/out/rk3566-radxa-zero-3e.dtb
+            run1/out/sha256sums.txt
