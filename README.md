@@ -1,7 +1,6 @@
 # radxa-zero-3-boot-firmware
 
-Deterministic, source-auditable boot firmware for the Radxa ZERO 3E and ZERO 3W
-(both `rk3566`) — mainline U-Boot + open-source TF-A BL31.
+Source-auditable boot firmware for the Radxa ZERO 3E and ZERO 3W — mainline U-Boot + open-source TF-A BL31.
 
 ## Comparing Boot Firmware Options
 
