@@ -1,4 +1,4 @@
-# radxa-zero-3-boot-firmware
+# radxa-zero-3-boot-firmware [![Discord](https://img.shields.io/badge/Discord-Join-5865F2?logo=discord&logoColor=white)](https://discord.gg/XCcQpEehej)
 
 Source-auditable boot firmware for the Radxa ZERO 3E and ZERO 3W — mainline U-Boot + open-source TF-A BL31.
 
@@ -12,7 +12,7 @@ Source-auditable boot firmware for the Radxa ZERO 3E and ZERO 3W — mainline U-
 | **[This repo](https://github.com/u-boot/u-boot/blob/v2026.07/configs/radxa-zero-3-rk3566_defconfig)** | [✅](https://github.com/u-boot/u-boot/blob/v2026.07/configs/radxa-zero-3-rk3566_defconfig "Mainline U-Boot v2026.07") | [✅](https://github.com/ARM-software/arm-trusted-firmware/blob/master/docs/plat/rockchip.rst "Open-source TF-A, built from source with PLAT=rk3568") |
 
 *✅ = upstream open source, ⚠ = open-source vendor fork, ❌ = closed-source blob.  
-All options use a closed rkbin DDR blob — no open alternative exists for RK3566.*
+All options use a closed <span title="Proprietary code from Rockchip that initializes the board's RAM before U-Boot runs.">rkbin DDR blob<sup>?</sup></span> — no open alternative exists for RK3566.*
 
 <details>
 <summary><b>Anatomy of this Repo's Boot Firmware</b></summary>
