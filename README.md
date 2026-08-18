@@ -1,11 +1,10 @@
-# radxa-zero-3-boot-firmware
+# radxa-zero-3-boot-firmware [![Discord](https://img.shields.io/badge/Discord-Join-5865F2?logo=discord&logoColor=white)](https://discord.gg/XCcQpEehej)
 
-Deterministic, source-auditable boot firmware for the Radxa ZERO 3E and ZERO 3W
-(both `rk3566`) — mainline U-Boot + open-source TF-A BL31.
+Source-auditable boot firmware for the Radxa ZERO 3E and ZERO 3W — mainline U-Boot + open-source TF-A BL31.
 
-## Comparing boot firmware options
+## Comparing Boot Firmware Options
 
-| Option | <abbr title="The boot loader for embedded boards — does what a PC's BIOS and GRUB do together: initialize hardware, then load the Linux kernel.">U-Boot</abbr> | <abbr title="Boot Loader stage 3-1 — ARM runtime firmware at EL3 that handles power management and stays resident alongside the OS">BL31</abbr> |
+| Option | <span title="The boot loader for embedded boards — does what a PC's BIOS and GRUB do together: initialize hardware, then load the Linux kernel.">U-Boot<sup>?</sup></span> | <span title="Boot Loader stage 3-1 — ARM runtime firmware at Exception Level 3 (the highest privilege level) that handles power management and stays resident alongside the OS">BL31<sup>?</sup></span> |
 | --- | :---: | :---: |
 | [Radxa vendor](https://github.com/radxa/u-boot/tree/next-dev-v2024.10) | [⚠](https://github.com/radxa/u-boot/tree/next-dev-v2024.10 "Vendor fork, not mainline U-Boot") | [❌](https://github.com/radxa/u-boot/blob/3a6d3179b16dfc65a81c883c3ad1ba45a5e082ed/make.sh#L551-L554 "Precompiled binary from rockchip-linux/rkbin — compiled from Rockchip's internal unpublished source") |
 | [Armbian](https://github.com/armbian/build/blob/main/config/boards/radxa-zero3.conf) | [✅](https://github.com/armbian/build/blob/main/config/boards/radxa-zero3.conf "Mainline U-Boot v2025.10") | [❌](https://github.com/armbian/build/blob/aabb6c5121b5314b9579ebde285010574f19022d/config/boards/radxa-zero3.conf#L36 "Precompiled binary from rockchip-linux/rkbin — compiled from Rockchip's internal unpublished source") |
@@ -13,10 +12,10 @@ Deterministic, source-auditable boot firmware for the Radxa ZERO 3E and ZERO 3W
 | **[This repo](https://github.com/u-boot/u-boot/blob/v2026.07/configs/radxa-zero-3-rk3566_defconfig)** | [✅](https://github.com/u-boot/u-boot/blob/v2026.07/configs/radxa-zero-3-rk3566_defconfig "Mainline U-Boot v2026.07") | [✅](https://github.com/ARM-software/arm-trusted-firmware/blob/master/docs/plat/rockchip.rst "Open-source TF-A, built from source with PLAT=rk3568") |
 
 *✅ = upstream open source, ⚠ = open-source vendor fork, ❌ = closed-source blob.  
-All options use a closed rkbin DDR blob — no open alternative exists for RK3566.*
+All options use a closed <span title="Proprietary code from Rockchip that initializes the board's RAM before U-Boot runs.">rkbin DDR blob<sup>?</sup></span> — no open alternative exists for RK3566.*
 
 <details>
-<summary><b>Anatomy of this Repo's Bootloader</b></summary>
+<summary><b>Anatomy of this Repo's Boot Firmware</b></summary>
 
 `u-boot-rockchip.bin` is the single flashable file. Here's what's in it (in boot order):
 1. **RKNS header (0x0)** — the Rockchip BootROM's table of contents: where TPL and SPL live, plus their hashes. The BootROM reads this first on power-up.
@@ -40,7 +39,6 @@ mkdir -p out
 docker run --rm -v "$PWD/out:/out" -e BUILD_DIR=/build -e OUT_DIR=/out radxa-zero3-boot-firmware
 ```
 
-See [BUILD_VERIFICATION.md](BUILD_VERIFICATION.md) for artifact verification.
 <details>
 <summary><b>Manually Flashing to the Boot Device</b></summary>
 

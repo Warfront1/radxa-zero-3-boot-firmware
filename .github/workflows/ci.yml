@@ -10,6 +10,8 @@ on:
 jobs:
   build-verify-reproduce:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
 
@@ -45,20 +47,53 @@ jobs:
         run: |
           set -euo pipefail
           for f in u-boot-rockchip.bin u-boot.itb rk3566-radxa-zero-3w.dtb rk3566-radxa-zero-3e.dtb; do
-            h1=$$(sha256sum "run1/out/$$f" | awk '{print $$1}')
-            h2=$$(sha256sum "run2/out/$$f" | awk '{print $$1}')
-            echo "$$f  run1=$$h1  run2=$$h2"
-            [ "$$h1" = "$$h2" ] || { echo "FAIL: $$f not reproducible"; exit 1; }
+            h1=$(sha256sum "run1/out/$f" | awk '{print $1}')
+            h2=$(sha256sum "run2/out/$f" | awk '{print $1}')
+            echo "$f  run1=$h1  run2=$h2"
+            [ "$h1" = "$h2" ] || { echo "FAIL: $f not reproducible"; exit 1; }
           done
           echo "PASS: all 4 artifacts byte-identical across isolated builds"
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: u-boot-rockchip-bin
+          name: radxa-zero-3-boot-firmware-artifacts
           path: |
             run1/out/u-boot-rockchip.bin
             run1/out/u-boot.itb
             run1/out/rk3566-radxa-zero-3w.dtb
             run1/out/rk3566-radxa-zero-3e.dtb
+            run1/out/sha256sums.txt
+
+      - name: Compute release tag
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          set -euo pipefail
+          base="$(cat pins/uboot/tag)"
+          git fetch --tags origin
+          tag="$base"
+          n=1
+          while git rev-parse "refs/tags/${tag}" >/dev/null 2>&1; do
+            tag="${base}-${n}"
+            n=$((n + 1))
+          done
+          echo "Computed release tag: ${tag}"
+          echo "tag=${tag}" >> "$GITHUB_OUTPUT"
+        id: reltag
+
+      - name: Publish release
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          tag="${{ steps.reltag.outputs.tag }}"
+          echo "Publishing release ${tag} with artifacts from run1/out/"
+          gh release create "${tag}" \
+            --generate-notes \
+            --title "${tag}" \
+            run1/out/u-boot-rockchip.bin \
+            run1/out/u-boot.itb \
+            run1/out/rk3566-radxa-zero-3w.dtb \
+            run1/out/rk3566-radxa-zero-3e.dtb \
             run1/out/sha256sums.txt

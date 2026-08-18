@@ -23,13 +23,21 @@ SIZE="$(stat -c%s "${BIN}")"
 [ "${SIZE}" -gt 262144 ] || { echo "FAIL: ${BIN} too small (${SIZE} B)" >&2; exit 1; }
 
 # FIT magic (big-endian 0xd00dfeed) must appear inside the single image.
-# Use grep -P (Perl regex) on the raw binary — most portable across od/xxd variants.
-if ! grep -c -P '\xd0\x0d\xfe\xed' "${BIN}" >/dev/null 2>&1; then
+# Use grep -aP (Perl regex, treat binary as text) — most portable across od/xxd variants.
+# -a is essential: without it grep prints "Binary file matches" and exits 2 on
+# binary input, which set -o pipefail / `!` would misread as failure.
+if ! grep -aP '\xd0\x0d\xfe\xed' "${BIN}" >/dev/null 2>&1; then
     # Fallback for systems without grep -P: use od and search for the hex pattern.
+    # Temporarily disable pipefail: with `grep -q`, grep exits 0 on first match
+    # and od receives SIGPIPE (exit 141). Under pipefail that 141 would wrongly
+    # win over grep's 0 and produce a false-negative FAIL.
+    set +o pipefail
     if ! od -A x -t x1 "${BIN}" | grep -qi 'd0 0d fe ed'; then
+        set -o pipefail
         echo "FAIL: FIT magic 0xd00dfeed not found in ${BIN}" >&2
         exit 1
     fi
+    set -o pipefail
 fi
 
 echo "ok: u-boot-rockchip.bin size=${SIZE} B, FIT magic present, u-boot.itb present"
