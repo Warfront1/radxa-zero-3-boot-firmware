@@ -3,9 +3,9 @@
 Deterministic, source-auditable boot firmware for the Radxa ZERO 3E and ZERO 3W
 (both `rk3566`) — mainline U-Boot + open-source TF-A BL31.
 
-## Comparing boot firmware options
+## Comparing Boot Firmware Options
 
-| Option | <span title="The boot loader for embedded boards — does what a PC's BIOS and GRUB do together: initialize hardware, then load the Linux kernel.">U-Boot ℹ️</span> | <span title="Boot Loader stage 3-1 — ARM runtime firmware at Exception Level 3 (the highest privilege level) that handles power management and stays resident alongside the OS">BL31 ℹ️</span> |
+| Option | <span title="The boot loader for embedded boards — does what a PC's BIOS and GRUB do together: initialize hardware, then load the Linux kernel.">U-Boot<sup>?</sup></span> | <span title="Boot Loader stage 3-1 — ARM runtime firmware at Exception Level 3 (the highest privilege level) that handles power management and stays resident alongside the OS">BL31<sup>?</sup></span> |
 | --- | :---: | :---: |
 | [Radxa vendor](https://github.com/radxa/u-boot/tree/next-dev-v2024.10) | [⚠](https://github.com/radxa/u-boot/tree/next-dev-v2024.10 "Vendor fork, not mainline U-Boot") | [❌](https://github.com/radxa/u-boot/blob/3a6d3179b16dfc65a81c883c3ad1ba45a5e082ed/make.sh#L551-L554 "Precompiled binary from rockchip-linux/rkbin — compiled from Rockchip's internal unpublished source") |
 | [Armbian](https://github.com/armbian/build/blob/main/config/boards/radxa-zero3.conf) | [✅](https://github.com/armbian/build/blob/main/config/boards/radxa-zero3.conf "Mainline U-Boot v2025.10") | [❌](https://github.com/armbian/build/blob/aabb6c5121b5314b9579ebde285010574f19022d/config/boards/radxa-zero3.conf#L36 "Precompiled binary from rockchip-linux/rkbin — compiled from Rockchip's internal unpublished source") |
@@ -16,7 +16,7 @@ Deterministic, source-auditable boot firmware for the Radxa ZERO 3E and ZERO 3W
 All options use a closed rkbin DDR blob — no open alternative exists for RK3566.*
 
 <details>
-<summary><b>Anatomy of this Repo's Bootloader</b></summary>
+<summary><b>Anatomy of this Repo's Boot Firmware</b></summary>
 
 `u-boot-rockchip.bin` is the single flashable file. Here's what's in it (in boot order):
 1. **RKNS header (0x0)** — the Rockchip BootROM's table of contents: where TPL and SPL live, plus their hashes. The BootROM reads this first on power-up.
