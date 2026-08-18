@@ -40,7 +40,6 @@ mkdir -p out
 docker run --rm -v "$PWD/out:/out" -e BUILD_DIR=/build -e OUT_DIR=/out radxa-zero3-boot-firmware
 ```
 
-See [BUILD_VERIFICATION.md](BUILD_VERIFICATION.md) for artifact verification.
 <details>
 <summary><b>Manually Flashing to the Boot Device</b></summary>
 
