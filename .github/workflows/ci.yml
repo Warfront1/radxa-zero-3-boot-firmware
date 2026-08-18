@@ -45,10 +45,10 @@ jobs:
         run: |
           set -euo pipefail
           for f in u-boot-rockchip.bin u-boot.itb rk3566-radxa-zero-3w.dtb rk3566-radxa-zero-3e.dtb; do
-            h1=$$(sha256sum "run1/out/$$f" | awk '{print $$1}')
-            h2=$$(sha256sum "run2/out/$$f" | awk '{print $$1}')
-            echo "$$f  run1=$$h1  run2=$$h2"
-            [ "$$h1" = "$$h2" ] || { echo "FAIL: $$f not reproducible"; exit 1; }
+            h1=$(sha256sum "run1/out/$f" | awk '{print $1}')
+            h2=$(sha256sum "run2/out/$f" | awk '{print $1}')
+            echo "$f  run1=$h1  run2=$h2"
+            [ "$h1" = "$h2" ] || { echo "FAIL: $f not reproducible"; exit 1; }
           done
           echo "PASS: all 4 artifacts byte-identical across isolated builds"
 
